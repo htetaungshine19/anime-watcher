@@ -1,0 +1,63 @@
+rewrite error handling for all api calls and fetching and screens that use internet access 
+
+
+fix library refresh
+add library noti
+add library upload from json or something backup
+check everything
+
+
+refactor not cleaned code
+write integration tests
+
+
+pub global run rename --bundleId com.animely.lucus  --target android
+
+
+
+(rewrite error handling for all api calls and fetching and screens that use internet access)regarding to this
+Anime Grid finished
+Anime Grid Item finished
+Recent screen finished
+Filter screen finished
+Search Screen finished
+library Screen finished
+Download finished
+
+fix download que
+without database
+
+adding que finished
+remove que finished
+remove all finished
+pause and resume finished
+download que finished
+
+
+with database
+current que finished
+
+
+fix downloaded series
+
+without database
+
+with database
+all finished
+
+
+
+
+Remaining
+
+
+add library noti(temp finished but not tested)
+add settings (finished but rewrite later)
+
+
+download refresh link with library(not tested but finish)
+fix library refresh(not tested but finish)
+
+
+explore screen if you have time
+add library upload from json or something backup(finished)

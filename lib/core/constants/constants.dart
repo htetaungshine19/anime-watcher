@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Constant {
   static const String url = "https://www1.gogoanime.cm/";
 
@@ -15,4 +17,5 @@ class Constant {
   static const Map<String, String> headers = {
     'Referer': 'https://gogoplay1.com/',
   };
+  static GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
 }

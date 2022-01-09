@@ -5,6 +5,7 @@ import 'package:animely/filter/presentation/filter_screen.dart';
 import 'package:animely/library/presentation/library_screen.dart';
 import 'package:animely/navigation/test_screen.dart';
 import 'package:animely/recent/presentation/recent_screen.dart';
+import 'package:faker/faker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

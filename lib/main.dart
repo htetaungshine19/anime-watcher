@@ -57,11 +57,11 @@ void main() async {
   }
   final settingsController = SettingsController(SettingsService());
   await settingsController.loadSettings();
-
   runApp(
     ProviderScope(
       child: Consumer(builder: (context, w, _) {
         return MaterialApp(
+          navigatorKey: Constant.key,
           debugShowCheckedModeBanner: false,
           restorationScopeId: 'app',
           onGenerateTitle: (BuildContext context) => "",

@@ -13,7 +13,8 @@ class LoadingScreen extends StatelessWidget {
         future: f,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            Navigator.of(context).pop(snapshot.data!);
+            Future.delayed(Duration.zero)
+                .then((value) => Navigator.of(context).pop(snapshot.data!));
             return const SizedBox();
           } else {
             return const Center(

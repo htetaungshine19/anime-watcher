@@ -35,6 +35,8 @@ dependencies:
   flutter_local_notifications: ^8.2.0 #n
   file_picker: ^4.2.4
   flutter_android_pip: ^0.0.2
+  webview_flutter: ^3.0.0
+  faker: ^2.0.0
 
 dev_dependencies:
   flutter_test:

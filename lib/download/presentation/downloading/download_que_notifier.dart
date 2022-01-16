@@ -179,15 +179,16 @@ class DownloadQueNotifier extends StateNotifier<DownloadQueWrapper> {
       await finishCurrentDownload();
       if (state.downloadQues.isNotEmpty) {
         final newQue = [...state.downloadQues];
-        final NetworkResult link = await downloadOneEpisode(
-          // newQue.first.anime,
-          newQue.first.episode,
-          newQue.first.resolution,
-        );
+        String link = "";
+        newQue.first.episode.servers.forEach((element) {
+          if (element.name == "rsL") {
+            link = element.iframe;
+          }
+        });
         final que = await download(
           anime: newQue.first.anime,
           episode: newQue.first.episode,
-          link: link.data,
+          link: link,
           resolution: newQue.first.resolution,
         );
         await DownloadQueRepo.delete(newQue.first);
@@ -259,8 +260,12 @@ class DownloadQueNotifier extends StateNotifier<DownloadQueWrapper> {
           currentQue: que,
         );
       } else {
+        // resolutionLink
         await DownloadQueRepo.add(DownloadQue(
-          episode: episode,
+          episode: episode.copyWith(servers: [
+            ...episode.servers,
+            Servers(name: "rsL", iframe: resolutionLink)
+          ]),
           id: "",
           anime: anime,
           progress: 0,
@@ -270,7 +275,10 @@ class DownloadQueNotifier extends StateNotifier<DownloadQueWrapper> {
         state = state.copyWith(downloadQues: [
           ...state.downloadQues,
           DownloadQue(
-              episode: episode,
+              episode: episode.copyWith(servers: [
+                ...episode.servers,
+                Servers(name: "rsL", iframe: resolutionLink)
+              ]),
               id: "",
               anime: anime,
               progress: 0,

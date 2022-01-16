@@ -1,14 +1,22 @@
+import 'dart:async';
+
+import 'package:animely/core/api/api.dart';
 import 'package:animely/core/models/anime.dart';
+import 'package:animely/core/models/network_return_result.dart';
 import 'package:animely/core/providers/provider.dart';
 import 'package:animely/core/utils/copytoclip.dart';
+import 'package:animely/core/utils/loading.dart';
 import 'package:animely/core/utils/refresh.dart';
 import 'package:animely/core/utils/show_snackbar.dart';
 import 'package:animely/core/widgets/episode_list.dart';
+import 'package:animely/download/data/data_source/network/network.dart';
 import 'package:animely/library/presentation/library_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:wakelock/wakelock.dart';
 
 class ShowAnimeDetail extends StatefulWidget {
   final Anime anime;
@@ -91,31 +99,101 @@ class _ShowAnimeDetailState extends State<ShowAnimeDetail> {
                         },
                       );
                     } else {
-                      await showGeneralDialog(
-                        context: context,
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          return AlertDialog(
-                            content: const Text('Are you sure?'),
-                            actions: [
-                              TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text("cancel")),
-                              TextButton(
-                                  onPressed: () async {
-                                    // await loading(
-                                    //     context,
-                                    //     context
-                                    //         .read(downloadedSeriesProvider.)
-                                    //         .downloadAll(widget.l));
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text("add"))
-                            ],
-                          );
-                        },
-                      );
+                      final status = await Permission.storage.request();
+                      if (status.isGranted) {
+                        final resolutionMaps = {
+                          "360": "360",
+                          "480": "480",
+                          "720": "720",
+                          "1080": "1080",
+                        };
+                        String resolution = "480";
+                        await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return SimpleDialog(
+                              backgroundColor: Colors.transparent,
+                              children: [
+                                ...resolutionMaps.keys
+                                    .map((e) => ElevatedButton(
+                                          onPressed: () {
+                                            resolution = e;
+
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text("${e}p"),
+                                        )),
+                              ],
+                            );
+                          },
+                        );
+                        bool a = true;
+                        await showGeneralDialog(
+                          context: context,
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) {
+                            return AlertDialog(
+                              content: const Text('Are you sure?'),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      a = true;
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("cancel")),
+                                TextButton(
+                                    onPressed: () async {
+                                      a = false;
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("add"))
+                              ],
+                            );
+                          },
+                        );
+                        if (a) return;
+                        Wakelock.enable();
+                        for (var i in widget.anime.episodes) {
+                          final onlineEpisode =
+                              await loading(context, animeEpisodeHandler(i));
+                          if (onlineEpisode.state == NetworkState.error) return;
+                          String link = '';
+                          for (var i in onlineEpisode.data.servers) {
+                            if (i.name == "main") {
+                              link = i.iframe;
+                            }
+                          }
+                          final res =
+                              await loading(context, getDownloadLinks(link));
+                          if (res.state == NetworkState.error) return;
+                          final resolutionMaps =
+                              (res.data as Map<String, String>);
+                          if (resolutionMaps.isEmpty) return;
+                          await loading(
+                              context,
+                              context
+                                  .read(downloadQuesProvider.notifier)
+                                  .addQue(
+                                    anime: widget.anime,
+                                    episodeId: i,
+                                    resolutionLink:
+                                        resolutionMaps[resolution] ??
+                                            resolutionMaps.values.first,
+                                    resolution: resolution,
+                                    episode: onlineEpisode.data,
+                                  ));
+                          await context
+                              .read(downloadQuesProvider.notifier)
+                              .pauseDownload();
+                        }
+                        await context
+                            .read(downloadQuesProvider.notifier)
+                            .resumeDownload();
+                        // Completer()
+
+                      } else {
+                        showSnackBar(context, 'permission denied');
+                      }
                     }
                   },
                   icon: Icon(downloadInclude ? Icons.done : Icons.download));

@@ -35,13 +35,13 @@ class AnimeGridItem extends StatefulWidget {
 }
 
 class _AnimeGridItemState extends State<AnimeGridItem> {
-  // @override
-  // void initState() {
-  //   if (widget.screenType == ScreenToScroll.recent) {
-  //     refreshOneLibrary(context, widget.anime);
-  //   }
-  //   super.initState();
-  // }
+  @override
+  void initState() {
+    if (widget.screenType == ScreenToScroll.recent) {
+      refreshOneLibrary(context, widget.anime);
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +102,10 @@ class _AnimeGridItemState extends State<AnimeGridItem> {
               if (pushAnime.state != NetworkState.error) {
                 await Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) {
-                    return ShowAnimeDetail(anime: pushAnime.data as Anime);
+                    return ShowAnimeDetail(
+                        anime: pushAnime.data as Anime,
+                        currentEp:
+                            (pushAnime.data as Anime).episodes.length - 1);
                   },
                 ));
               }

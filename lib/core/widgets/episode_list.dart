@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 enum NavType { replace, push }
 
@@ -31,50 +32,72 @@ class EpisodeList extends StatefulWidget {
 }
 
 class _EpisodeListState extends State<EpisodeList> {
+  final AutoScrollController controller = AutoScrollController();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      if (widget.currentEpisodeId != -1) {
+        controller.scrollToIndex(widget.currentEpisodeId,
+            duration: const Duration(microseconds: 40));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      controller: controller,
       shrinkWrap: false,
       itemCount: widget.anime.totalEpisodes,
       itemBuilder: (context, index) {
-        return Consumer(builder: (context, w, _) {
-          final downloadedSeries = w(downloadedSeriesProvider).downloadedSeries;
-          bool downloaded = false;
-          Episode? downloadedEpisode;
-          bool currentlyDownloading = false;
-          for (var element in downloadedSeries) {
-            if (element.anime.id == widget.anime.id) {
-              for (var i in element.downloadedEpisode) {
-                if (i.id == widget.anime.episodes.elementAt(index)) {
-                  downloaded = true;
-                  downloadedEpisode = i;
-                  break;
+        return AutoScrollTag(
+          controller: controller,
+          index: index,
+          key: ValueKey(index),
+          child: Consumer(builder: (context, w, _) {
+            final downloadedSeries =
+                w(downloadedSeriesProvider).downloadedSeries;
+            bool downloaded = false;
+            Episode? downloadedEpisode;
+            bool currentlyDownloading = false;
+            for (var element in downloadedSeries) {
+              if (element.anime.id == widget.anime.id) {
+                for (var i in element.downloadedEpisode) {
+                  if (i.id == widget.anime.episodes.elementAt(index)) {
+                    downloaded = true;
+                    downloadedEpisode = i;
+                    break;
+                  }
                 }
+                break;
               }
-              break;
             }
-          }
-          if (w(downloadQuesProvider).currentQue != null) {
-            final currentDownload = w(downloadQuesProvider).currentQue!;
-            if (currentDownload.anime.id == widget.anime.id &&
-                currentDownload.episode.id ==
-                    widget.anime.episodes.elementAt(index)) {
-              currentlyDownloading = true;
+            if (w(downloadQuesProvider).currentQue != null) {
+              final currentDownload = w(downloadQuesProvider).currentQue!;
+              if (currentDownload.anime.id == widget.anime.id &&
+                  currentDownload.episode.id ==
+                      widget.anime.episodes.elementAt(index)) {
+                currentlyDownloading = true;
+              }
             }
-          }
-          return EpisodeListTile(
-            currentlySelected: index == widget.currentEpisodeId,
-            currentlyDownloading: currentlyDownloading,
-            downloaded: downloaded,
-            navType: widget.navType,
-            currentIndex: index,
-            anime: widget.anime,
-            episode: downloadedEpisode,
-            percentage: currentlyDownloading
-                ? w(downloadQuesProvider).currentQue!.progress
-                : 0,
-          );
-        });
+            if (widget.currentEpisodeId == index) {
+              print(widget.currentEpisodeId);
+            }
+            return EpisodeListTile(
+              currentlySelected: index == widget.currentEpisodeId,
+              currentlyDownloading: currentlyDownloading,
+              downloaded: downloaded,
+              navType: widget.navType,
+              currentIndex: index,
+              anime: widget.anime,
+              episode: downloadedEpisode,
+              percentage: currentlyDownloading
+                  ? w(downloadQuesProvider).currentQue!.progress
+                  : 0,
+            );
+          }),
+        );
       },
     );
   }

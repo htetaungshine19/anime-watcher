@@ -12,8 +12,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ShowAnimeDetail extends StatefulWidget {
   final Anime anime;
-
-  const ShowAnimeDetail({Key? key, required this.anime}) : super(key: key);
+  final int currentEp;
+  const ShowAnimeDetail({Key? key, required this.anime, this.currentEp = -1})
+      : super(key: key);
 
   @override
   State<ShowAnimeDetail> createState() => _ShowAnimeDetailState();
@@ -145,7 +146,7 @@ class _ShowAnimeDetailState extends State<ShowAnimeDetail> {
                       flex: o == Orientation.landscape ? 2 : 1,
                       child: EpisodeList(
                         anime: widget.anime,
-                        currentEpisodeId: -1,
+                        currentEpisodeId: widget.currentEp,
                         navType: NavType.push,
                       ))
                 ],

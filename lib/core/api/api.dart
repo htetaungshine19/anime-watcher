@@ -30,10 +30,28 @@ Future<NetworkResult> getStreamLink(Episode ep) async {
     final rp =
         RegExp(r"https:\/\/.+\.m3u8", caseSensitive: false, multiLine: true);
     if (rp.allMatches(res.body).isEmpty) {
-      final link = await downloadOneEpisode(ep, "480");
+      String l = '';
+      for (var i in ep.servers) {
+        if (i.name == "main") {
+          l = i.iframe;
+        }
+      }
+
+      Map<String, String> links = {};
+
+      final link = await getDownloadLinks(l);
       if (link.state == NetworkState.error) throw Exception();
       List<Servers> servers = ep.servers;
-      servers.add(Servers(name: "stream_link", iframe: link.data as String));
+      servers.add(Servers(
+          name: "stream_link",
+          iframe: (link.data as Map<String, String>)['480'] ??
+              (link.data as Map<String, String>).values.first));
+      (link.data as Map<String, String>).forEach((key, val) {
+        servers.add(Servers(
+          name: key,
+          iframe: val,
+        ));
+      });
       returnValue = ep.copyWith(servers: servers, type: EpisodeType.network);
       return NetworkResult<Episode>(
           state: NetworkState.success, data: returnValue);

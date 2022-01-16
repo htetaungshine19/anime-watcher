@@ -86,7 +86,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
           player!.addListener(_playerCallBack);
           final link = getLink("stream_link");
           final reso = getResolutions(link);
-
+          final Map<String, String> gg = {};
+          widget.currentEpisode.servers.forEach((element) {
+            if (element.name == "360" ||
+                element.name == "480" ||
+                element.name == "720" ||
+                element.name == "1080") {
+              gg[element.name] = element.iframe;
+            }
+          });
           videoList = {
             "video": [
               {
@@ -95,7 +103,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
                   {"url": link, "name": "auto"},
                   ...reso.keys.map((e) {
                     return {"url": reso[e], "name": e};
-                  })
+                  }),
+                  ...gg.keys.map((e) {
+                    return {"url": reso[e], "name": e};
+                  }),
                 ]
               },
             ]
